@@ -12,6 +12,6 @@ public class ApiResponse <T>{
     private String message;
     HttpStatus status;
     private LocalDateTime timestamp;
-    private T Payroad;
+    private T Payload;
 
 }

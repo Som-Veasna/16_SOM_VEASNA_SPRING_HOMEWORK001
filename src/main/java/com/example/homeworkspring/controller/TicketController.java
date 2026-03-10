@@ -34,7 +34,8 @@ public class TicketController {
     @Operation(summary = "Add ticket")
     @PostMapping
     public ResponseEntity<?> addTicket(@RequestBody TicketRequest ticket) {
-        Ticket ticket1=new Ticket(ticket.getPassengerName(),ticket.getTravelDate(),ticket.getSourceStation(),ticket.getDestinationStation(),ticket.getPrice(),ticket.getPaymentStatus(),ticket.getTicketStatus(),ticket.getSeatNumber());
+        Ticket ticket1=new Ticket(ticket.getPassengerName(),ticket.getTravelDate(),ticket.getSourceStation(),ticket.getDestinationStation(),ticket.getPrice(),ticket.getPaymentStatus(),ticket.getTicketStatus().toUpperCase(),ticket.getSeatNumber());
+        tickets.add(ticket1);
         ApiResponse<Ticket> response=new ApiResponse<>(true,"Succesfully",HttpStatus.OK,LocalDateTime.now(),ticket1);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -90,6 +91,7 @@ public class TicketController {
             if (ticket.getTicketId()==id) {
                 tickets.remove(ticket);
                 ApiResponse<Ticket> response=new ApiResponse<>(true,"Succesfully",HttpStatus.OK,LocalDateTime.now(),ticket);
+
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
