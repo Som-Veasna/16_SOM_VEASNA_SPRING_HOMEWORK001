@@ -88,14 +88,17 @@ public class TicketController {
     public ResponseEntity<?> addMultipleTickets(@RequestBody List<TicketRequest> ticket) {
         List<Ticket> newTickets=new ArrayList<>();
         List<Ticket> addTickets = new ArrayList<>();
-        for (TicketRequest ticket1 : ticket) {
-            Ticket multipleTicket= new Ticket(ticket1.getPassengerName(), ticket1.getTravelDate(), ticket1.getSourceStation(), ticket1.getDestinationStation(), ticket1.getPrice(), ticket1.getPaymentStatus(), ticket1.getTicketStatus(), ticket1.getSeatNumber());
-            tickets.add(multipleTicket);
-            addTickets.add(multipleTicket);
+        tickets.stream()
+                .forEach(
+                        ticket1 -> {
+                            Ticket multipleTicket=new Ticket(ticket1.getPassengerName(), ticket1.getTravelDate(), ticket1.getSourceStation(), ticket1.getDestinationStation(), ticket1.getPrice(), ticket1.getPaymentStatus(), ticket1.getTicketStatus(), ticket1.getSeatNumber());
+                            tickets.add(multipleTicket);
+                            addTickets.add(multipleTicket);
+                        }
+                );
+
             ApiResponse<List<Ticket>> response = new ApiResponse<>(true, "Succesfully", HttpStatus.OK,newTickets, LocalDateTime.now());
             return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        return ResponseEntity.badRequest().build();
     }
     @Operation(summary = "Delete ticket by id")
     @DeleteMapping("/{id}")
