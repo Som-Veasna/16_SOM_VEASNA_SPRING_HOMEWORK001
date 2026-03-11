@@ -5,6 +5,7 @@ import com.example.homeworkspring.entity.TicketRequest;
 import com.example.homeworkspring.entity.TicketStatus;
 import com.example.homeworkspring.entity.UpdatePaymentStatus;
 import com.example.homeworkspring.response.ApiResponse;
+import com.example.homeworkspring.response.NotFoundResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class TicketController {
         Ticket ticket1=new Ticket(ticket.getPassengerName(),ticket.getTravelDate(),ticket.getSourceStation(),ticket.getDestinationStation(),ticket.getPrice(),ticket.getPaymentStatus(),ticket.getTicketStatus().toUpperCase(),ticket.getSeatNumber());
         tickets.add(ticket1);
         ApiResponse<Ticket> response=new ApiResponse<>(true,"Succesfully",HttpStatus.OK,LocalDateTime.now(),ticket1);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @Operation(summary = "Get ticket by id")
     @GetMapping("/{id}")
@@ -48,7 +49,8 @@ public class TicketController {
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        NotFoundResponse notFoundResponse=new NotFoundResponse(false,"No Ticket found with Id:"+id,HttpStatus.NOT_FOUND, LocalDateTime.now());
+        return new ResponseEntity<>(notFoundResponse, HttpStatus.NOT_FOUND);
     }
     @Operation(summary = "Get ticket by name")
     @GetMapping("/search")
@@ -59,7 +61,8 @@ public class TicketController {
                   return new ResponseEntity<>(response, HttpStatus.OK);
               }
           }
-          return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        NotFoundResponse notFoundResponse=new NotFoundResponse(false,"No Ticket found with Id:"+name,HttpStatus.NOT_FOUND, LocalDateTime.now());
+          return new ResponseEntity<>(notFoundResponse, HttpStatus.NOT_FOUND);
     }
     @Operation(summary = "Get ticket by status and Travel date")
     @GetMapping("/filter")
@@ -75,14 +78,16 @@ public class TicketController {
     @Operation(summary = "Add multiple ticket")
     @PostMapping("/bulk")
     public ResponseEntity<?> addMultipleTickets(@RequestBody List<TicketRequest> ticket) {
+        List<Ticket> newTickets=new ArrayList<>();
+        List<Ticket> addTickets = new ArrayList<>();
         for (TicketRequest ticket1 : ticket) {
-            tickets.add(
-                    new Ticket(ticket1.getPassengerName(),ticket1.getTravelDate(),ticket1.getSourceStation(),ticket1.getDestinationStation(),ticket1.getPrice(),ticket1.getPaymentStatus(),ticket1.getTicketStatus(),ticket1.getSeatNumber())
-            );
-            ApiResponse<List<Ticket>> response=new ApiResponse<>(true,"Succesfully",HttpStatus.OK,LocalDateTime.now(),tickets);
+            Ticket multipleTicket= new Ticket(ticket1.getPassengerName(), ticket1.getTravelDate(), ticket1.getSourceStation(), ticket1.getDestinationStation(), ticket1.getPrice(), ticket1.getPaymentStatus(), ticket1.getTicketStatus(), ticket1.getSeatNumber());
+            tickets.add(multipleTicket);
+            addTickets.add(multipleTicket);
+            ApiResponse<List<Ticket>> response = new ApiResponse<>(true, "Succesfully", HttpStatus.OK, LocalDateTime.now(), newTickets);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return ResponseEntity.badRequest().build();
     }
     @Operation(summary = "Delete ticket by id")
     @DeleteMapping("/{id}")
@@ -95,7 +100,8 @@ public class TicketController {
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        NotFoundResponse notFoundResponse=new NotFoundResponse(false,"No Ticket found with Id:"+id,HttpStatus.NOT_FOUND, LocalDateTime.now());
+        return new ResponseEntity<>(notFoundResponse, HttpStatus.NOT_FOUND);
     }
     @Operation(summary = "Update ticket by id")
     @PutMapping("/{id}")
@@ -114,11 +120,12 @@ public class TicketController {
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        NotFoundResponse notFoundResponse=new NotFoundResponse(false,"No Ticket found with Id:"+id,HttpStatus.NOT_FOUND, LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(notFoundResponse);
     }
     @Operation(summary = "Update status by multiple ticket")
     @PutMapping("/bulk")
-    public ResponseEntity<?> updateMultiplePaaymentStatus(@RequestBody UpdatePaymentStatus updatePaymentStatus) {
+    public ResponseEntity<?> updateMultiplePaymentStatus(@RequestBody UpdatePaymentStatus updatePaymentStatus) {
         List<Ticket> ticketUpdate=new ArrayList<>();
         for(Integer id:updatePaymentStatus.getTicketIds()) {
             for (Ticket ticket : tickets) {
@@ -128,9 +135,8 @@ public class TicketController {
                 }
             }
         }
-        ApiResponse<List<Ticket>> response=new ApiResponse<>(true,"Succesfully",HttpStatus.OK,LocalDateTime.now(),tickets);
+        ApiResponse<List<Ticket>> response=new ApiResponse<>(true,"Succesfully",HttpStatus.OK,LocalDateTime.now(),ticketUpdate);
        return new ResponseEntity<>(response, HttpStatus.OK);
-
     }
 
 
